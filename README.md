@@ -1,3 +1,5 @@
+using GlitchHunterCoder [taskScheduler](https://github.com/GlitchHunterCoder/Bloxd-Async/tree/main?tab=readme-ov-file)
+
 this loader support
 - module
 - taskScheduler
