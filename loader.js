@@ -443,7 +443,7 @@ globalThis.PM = (() => {
     globalDelete: (name) => mod.globalDelete(name)
   };
 })();
-
+// end GlitchHunterCoder code
 const waitLoadBlock = function* (pos){
   while(!api.isBlockInLoadedChunk(...pos)){
     api.getBlock(pos)
@@ -454,6 +454,7 @@ const waitLoadBlock = function* (pos){
 const module = new class{
   constructor(){
     this._cache = {}
+    this._importStack = []
   }
   makeNewExport(pos){
     return function (key,value){
@@ -469,7 +470,7 @@ const module = new class{
         if(this._cache[pos][key]){
           Logger.warn({pos,key,value},"this key is already exported.")
         }
-        this._cache[key] = value
+        this._cache[pos][key] = value
       }
     }.bind(this)
   }
@@ -479,7 +480,16 @@ const module = new class{
         return Object.fromEntries(names.map((name) => [name,this._cache[pos][name]]))
       }
       else{
-        yield* loadCodeBlock(pos)
+        const posKey = pos.toString()
+        if(this._importStack.includes(posKey)){
+          throw new TypeError("import is loop!!")
+        }
+        this._importStack.push(posKey)
+        try{
+          yield* loadCodeBlock(pos)
+        } finally {
+          this._importStack.pop()
+        }
         if(this._cache[pos]){
           return Object.fromEntries(names.map((name) => [name,this._cache[pos][name]]))
         }
